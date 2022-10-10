@@ -9,6 +9,7 @@
 
 import socket
 import os
+import time
 
 IP = socket.gethostbyname(socket.gethostname())
 PORT = 12000
@@ -21,12 +22,24 @@ PATH = "SERVER"
 def main():
     logfile = open('Log.txt', 'a') # append the logfile
     logs = [] # use a list to store new logs
+    
+    # first recv a number
+    
+    
+    
+    
+    last_time = time.localtime(time.time())
+    cur_time = time.localtime(time.time())
+    # each time client end a connection will renew the time
+    # >=20 second not appear new connection ask, then print logs and exit
 
     def list():
         pass
 
+
     def download():
         pass
+
 
     def upload():
         pass
@@ -36,41 +49,47 @@ def main():
         pass
 
 
-
-    print(f"[INITIALIZING] Check whether the directory {PATH} exists")
+    # initialize
+    logs.append(f"[INITIALIZING] Check whether the directory {PATH} exists")
     if not os.path.exists(PATH):
-        print(f"[CHECK] The directory {PATH} does not exist")
+        logs.append(f"[CHECK] The directory {PATH} does not exist")
         os.makedirs(PATH)
-        print(f"[MAKEDIR] the directory {PATH} created")
+        logs.append(f"[MAKEDIR] the directory {PATH} created")
     else:
-        print(f"[CHECK] The directory {PATH} exists")
+        logs.append(f"[CHECK] The directory {PATH} exists")
 
-    print('[STARTING] Server is starting.')
+    logs.append('[STARTING] Server is starting.')
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
-    print('[LISTENING] Server is listening.')
-
+    logs.append('[LISTENING] Server is listening.')
+    last_time = time.localtime(time.time())
+    
     while True:
         conn, addr = server.accept()
-        print(f"[NEW CONNECTION] {addr} connected.")
+        conn.send("Connect sucessfully".encode(FORMAT))
+
+        logs.append(f"[NEW CONNECTION] {addr} connected.")
 
         filename = conn.recv(SIZE).decode(FORMAT)
-        print("[RECV] Filename received.")
+        logs.append("[RECV] Filename received.")
         file = open(PATH+'\\'+filename, "w")
         conn.send("Filename is received.".encode())
 
         data = conn.recv(SIZE).decode(FORMAT)
-        print(f"[RECV] File data received.")
+        logs.append(f"[RECV] File data received.")
         file.write(data)
         conn.send("File data received.".encode(FORMAT))  
 
         file.close()
         conn.close()    
-        print(f"[DISCONNECTED] {addr} disconnected.")  
+        logs.append(f"[DISCONNECTED] {addr} disconnected.")  
 
+        last_time = time.localtime(time.time())
+        
 
     for log in logs:
+        print(log)
         logfile.write(log + '\n')
     logfile.close()
 
