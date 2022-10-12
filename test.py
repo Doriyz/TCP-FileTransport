@@ -1,2 +1,2 @@
-msg = "hlii"
-print(msg[0:])
+name = "null"
+print(name[1:])

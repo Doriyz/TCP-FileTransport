@@ -7,6 +7,7 @@
 '''
 
 
+from pickle import FROZENSET
 import socket
 import os
 import time
@@ -16,82 +17,107 @@ PORT = 12000
 ADDR = (IP, PORT)
 SIZE = 2048
 FORMAT = 'utf-8'
-PATH = "SERVER"
+PATH = "SERVER" 
 
 
 def main():
     logfile = open('Log.txt', 'a') # append the logfile
     logs = [] # use a list to store new logs
     
-    # first recv a number
+
+    def addLog(log):
+        logfile.write(log + '\n')
+        print(log)
+
     
-    
-    
-    
-    last_time = time.localtime(time.time())
-    cur_time = time.localtime(time.time())
-    # each time client end a connection will renew the time
-    # >=20 second not appear new connection ask, then print logs and exit
-
-    def list():
-        pass
-
-
-    def download():
-        pass
+    def list(conn, addr):
+        namelist = os.listdir(PATH)
+        namestr = ""
+        for name in namelist:
+            namestr = namestr + name + " "
+        addLog("[LIST] Send the list of filename in server dir to client.")
+        if len(namelist) == 0:
+            conn.send("null ".encode(FORMAT)) # a length(0) string can not be sent,use null instead
+        conn.send(namestr.encode(FORMAT))
+        msg = conn.recv(SIZE).decode(FORMAT)
+        addLog(msg)
 
 
-    def upload():
-        pass
+    def download(conn, addr):
+        conn.send("[DOWNLOAD] Server is ready to upload files".encode(FORMAT))
+        filenames = conn.recv(SIZE).decode(FORMAT)
+        # client is able to download more then one file once a time
+        filenames = filenames.split(" ")
+        for filename in filenames:
+            file = open(PATH + "\\" + filename, 'r')
+            filedata = file.read()
+            conn.send(filedata.encode(FORMAT))
+            msg = conn.recv(SIZE).decode(FORMAT)
+            addLog(msg)
+            file.close()
 
+   
 
-    def printLogs():
-        pass
-
+    def upload(conn, addr):
+        conn.send("[UPLOAD] Server is ready to receive files.".encode(FORMAT)) 
+        filenames = conn.recv(SIZE).decode(FORMAT)
+        conn.send("[UPLOAD] Server receive file names successfully.".encode(FORMAT)) 
+        # client is able to download more then one file once a time
+        filenames = filenames.split(" ")
+        for filename in filenames:
+            file = open(PATH + "\\" + filename, 'w') 
+            filedata = conn.recv(SIZE).decode(FORMAT)
+            if filedata != "NULL":
+                file.write(filedata)
+            file.close()
+            addLog(f"[UPLOAD] Client {ADDR} upload the file {filename} sucessfully.")
+            conn.send(f"[UPLOAD] Client {ADDR} upload the file {filename} sucessfully.".encode(FORMAT))
+       
 
     # initialize
-    logs.append(f"[INITIALIZING] Check whether the directory {PATH} exists")
+    addLog(f"[INITIALIZING] Check whether the directory {PATH} exists")
     if not os.path.exists(PATH):
-        logs.append(f"[CHECK] The directory {PATH} does not exist")
+        addLog(f"[CHECK] The directory {PATH} does not exist")
         os.makedirs(PATH)
-        logs.append(f"[MAKEDIR] the directory {PATH} created")
+        addLog(f"[MAKEDIR] the directory {PATH} created")
     else:
-        logs.append(f"[CHECK] The directory {PATH} exists")
+        addLog(f"[CHECK] The directory {PATH} exists")
 
-    logs.append('[STARTING] Server is starting.')
+    addLog('[STARTING] Server is starting.')
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
-    logs.append('[LISTENING] Server is listening.')
-    last_time = time.localtime(time.time())
+    addLog('[LISTENING] Server is listening.')
     
+     
+    # the first loop is for new connection
+    # the second loop is for new command in each connection
     while True:
         conn, addr = server.accept()
-        conn.send("Connect sucessfully".encode(FORMAT))
-
-        logs.append(f"[NEW CONNECTION] {addr} connected.")
-
-        filename = conn.recv(SIZE).decode(FORMAT)
-        logs.append("[RECV] Filename received.")
-        file = open(PATH+'\\'+filename, "w")
-        conn.send("Filename is received.".encode())
-
-        data = conn.recv(SIZE).decode(FORMAT)
-        logs.append(f"[RECV] File data received.")
-        file.write(data)
-        conn.send("File data received.".encode(FORMAT))  
-
-        file.close()
-        conn.close()    
-        logs.append(f"[DISCONNECTED] {addr} disconnected.")  
-
-        last_time = time.localtime(time.time())
+        conn.send("[STATUS] Connect to server successfully.".encode(FORMAT))
+        addLog(f"[NEW CONNECTION] {addr} connected.")
+        # first recv a msg to get the kind of function
+        functionType = conn.recv(SIZE).decode(FORMAT)
+        while True:
+            if functionType.startswith("list"):
+                list(conn, addr)
+            elif functionType.startswith("download"):
+                download(conn, addr)
+            elif functionType.startswith("upload"):
+                upload(conn, addr)
+            elif functionType.startswith("exit"):
+                break
+            functionType = conn.recv(SIZE).decode(FORMAT)
+        # disconnect
+        msg = conn.recv(SIZE).decode(FORMAT)
+        addLog(msg)
+        conn.send("[DISCONNECTION] Server is ready to disconnect".encode(FORMAT))
+        msg = conn.recv(SIZE).decode(FORMAT)
+        addLog(msg)
+        conn.close()
+        addLog("[DISCONNECTION] Success.")
         
-
-    for log in logs:
-        print(log)
-        logfile.write(log + '\n')
-    logfile.close()
+    
 
 if __name__ == '__main__':
     main()

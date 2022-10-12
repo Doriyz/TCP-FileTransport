@@ -1,0 +1,75 @@
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62262) connected.
+[LIST] Send the list of filename in server dir to client.
+[LIST] client ('192.168.192.1', 12000) receive the file names successfully
+[DISCONNECT] Client ask for disconnection.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER does not exist
+[MAKEDIR] the directory SERVER created
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62267) connected.
+[LIST] Send the list of filename in server dir to client.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62329) connected.
+[LIST] Send the list of filename in server dir to client.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62334) connected.
+[LIST] Send the list of filename in server dir to client.
+[LIST] client ('192.168.192.1', 12000) receive the file names successfully
+[DISCONNECT] Client ask for disconnection.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62463) connected.
+[LIST] Send the list of filename in server dir to client.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62477) connected.
+[LIST] Send the list of filename in server dir to client.
+[LIST] client ('192.168.192.1', 12000) receive the file names successfully
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62481) connected.
+[LIST] Send the list of filename in server dir to client.
+[LIST] client ('192.168.192.1', 12000) receive the file names successfully
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62492) connected.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62494) connected.
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62503) connected.
+[LIST] Send the list of filename in server dir to client.
+[LIST] client ('192.168.192.1', 12000) receive the file names successfully
+[INITIALIZING] Check whether the directory SERVER exists
+[CHECK] The directory SERVER exists
+[STARTING] Server is starting.
+[LISTENING] Server is listening.
+[NEW CONNECTION] ('192.168.192.1', 62505) connected.
+[LIST] Send the list of filename in server dir to client.
+[LIST] client ('192.168.192.1', 12000) receive the file names successfully
+[UPLOAD] Client ('192.168.192.1', 12000) upload the file test.txt sucessfully.
+[DISCONNECT] Client ask for disconnection.
