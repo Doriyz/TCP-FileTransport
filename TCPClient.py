@@ -26,7 +26,9 @@ from pydoc import cli
 import socket
 import os
 
-IP = socket.gethostbyname(socket.gethostname())
+# IP = socket.gethostbyname(socket.gethostname())
+IP = 'LAPTOP-MAYSION'
+# IP = 'Gulfira'
 PORT = 12000
 ADDR = (IP, PORT)
 FORMAT = 'utf-8'
@@ -74,14 +76,17 @@ def main():
         for filename in filenames:
             file = open(PATH + "\\" + filename, 'w') 
             filedata = client.recv(SIZE).decode(FORMAT)
-            file.write(filedata)
-            file.close()
-            print(f"[DOWNLOAD] Client {ADDR} download the file {filename} sucessfully.")
-            client.send(f"[DOWNLOAD] Client {ADDR} download the file {filename} sucessfully.".encode(FORMAT))
-        
-        
-       
+            if filedata == "NULL":
+                print(f"[DOWNLOAD] File {filename} is not in Server dir.")
+                client.send(f"[DOWNLOAD] File {filename} is not in Server dir.".encode(FORMAT))
+            else:
+                file.write(filedata)
+                print(f"[DOWNLOAD] Client {ADDR} download the file {filename} sucessfully.")
+                client.send(f"[DOWNLOAD] Client {ADDR} download the file {filename} sucessfully.".encode(FORMAT))
 
+            file.close()
+           
+     
     def upload(filenames):
         client.send("upload".encode(FORMAT))
         msg = client.recv(SIZE).decode(FORMAT)
