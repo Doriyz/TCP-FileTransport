@@ -8,7 +8,7 @@
 
 import socket
 import os
-
+import datetime
 
 # IP = socket.gethostbyname(socket.gethostname())
 IP = 'LAPTOP-MAYSION'
@@ -16,111 +16,131 @@ PORT = 12000
 ADDR = (IP, PORT)
 SIZE = 2048
 FORMAT = 'utf-8'
-PATH = "SERVER" 
+UPPERPATH = os.path.join(os.path.dirname(__file__), '..') # store the logfile in upper path
+DIRPATH = UPPERPATH + "/SERVER" 
 
 
 def main():
     
-    def addLog(logfile, log):
+    # below variables will be defined before real use
+    logfile = None 
+    conn = None
+    addr = None
+    
+
+    def addLog(log):
         logfile.write(log + '\n')
         print(log)
 
     
-    def list(conn, addr):
-        namelist = os.listdir(PATH)
+    def list():
+        namelist = os.listdir(DIRPATH)
         namestr = ""
         for name in namelist:
             namestr = namestr + name + " "
-        addLog(logfile, "[LIST] Send the list of filename in server dir to client.")
+        addLog("[LIST] Send the list of filename in server dir to client.")
         if len(namelist) == 0:
             conn.send("null ".encode(FORMAT)) # a length(0) string can not be sent,use null instead
         conn.send(namestr.encode(FORMAT))
         msg = conn.recv(SIZE).decode(FORMAT)
-        addLog(logfile, msg)
+        addLog(msg)
 
 
-    def download(conn, addr):
+    def download():
         conn.send("[DOWNLOAD] Server is ready to upload files".encode(FORMAT))
         filenames = conn.recv(SIZE).decode(FORMAT)
         # client is able to download more then one file once a time
         filenames = filenames.split(" ")
-        namelist = os.listdir(PATH)
+        namelist = os.listdir(DIRPATH)
         for filename in filenames:
             if filename in namelist:
-                file = open(PATH + "\\" + filename, 'r')
+                file = open(DIRPATH + "\\" + filename, 'r')
                 filedata = file.read()
                 file.close()
             else:
                 filedata = 'NULL'
             conn.send(filedata.encode(FORMAT))
             msg = conn.recv(SIZE).decode(FORMAT)
-            addLog(logfile, msg)
+            addLog(msg)
 
    
-    def upload(conn, addr):
+    def upload():
         conn.send("[UPLOAD] Server is ready to receive files.".encode(FORMAT)) 
         filenames = conn.recv(SIZE).decode(FORMAT)
         conn.send("[UPLOAD] Server receive file names successfully.".encode(FORMAT)) 
         # client is able to download more then one file once a time
         filenames = filenames.split(" ")
         for filename in filenames:
-            file = open(PATH + "\\" + filename, 'w') 
             filedata = conn.recv(SIZE).decode(FORMAT)
             if filedata != "NULL":
+                file = open(DIRPATH + "\\" + filename, 'w')    
                 file.write(filedata)
-            file.close()
-            addLog(logfile, f"[UPLOAD] Client {ADDR} upload the file {filename} sucessfully.")
-            conn.send(f"[UPLOAD] Client {ADDR} upload the file {filename} sucessfully.".encode(FORMAT))
+                file.close()
+                addLog(f"[UPLOAD] Client {ADDR} upload the file {filename} sucessfully.")
+                conn.send(f"[UPLOAD] Client {ADDR} upload the file {filename} sucessfully.".encode(FORMAT))
        
 
     # initialize
-    logfile = open('Log.txt', 'a')
-    addLog(logfile, f"[INITIALIZING] Check whether the directory {PATH} exists")
-    if not os.path.exists(PATH):
-        addLog(logfile, f"[CHECK] The directory {PATH} does not exist")
-        os.makedirs(PATH)
-        addLog(logfile, f"[MAKEDIR] the directory {PATH} created")
+    logfile = open(UPPERPATH + '\\' + 'ServerLog.txt', 'a')
+    logfile.write('\n')
+    logfile.write(str(datetime.datetime.now()) + '\n') # record time
+    addLog(f"[INITIALIZING] Check whether the directory {DIRPATH} exists")
+    if not os.path.exists(DIRPATH):
+        addLog(f"[CHECK] The directory {DIRPATH} does not exist")
+        os.makedirs(DIRPATH)
+        addLog(f"[MAKEDIR] the directory {DIRPATH} created")
     else:
-        addLog(logfile, f"[CHECK] The directory {PATH} exists")
+        addLog(f"[CHECK] The directory {DIRPATH} exists")
 
-    addLog(logfile, '[STARTING] Server is starting.')
+    addLog('[STARTING] Server is starting.')
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
-    addLog(logfile, '[LISTENING] Server is listening.')
+    addLog('[LISTENING] Server is listening.')
     logfile.close()
     
      
     # the first loop is for new connection
     # the second loop is for new command in each connection
     while True:
-        logfile = open('Log.txt', 'a')
         conn, addr = server.accept()
+        logfile = open(UPPERPATH + '\\' + 'ServerLog.txt', 'a')
         conn.send("[STATUS] Connect to server successfully.".encode(FORMAT))
-        addLog(logfile, f"[NEW CONNECTION] {addr} connected.")
+        addLog(f"[NEW CONNECTION] {addr} connected.")
         # first recv a msg to get the kind of function
         functionType = conn.recv(SIZE).decode(FORMAT)
         while True:
             if functionType.startswith("list"):
-                list(conn, addr)
+                list()
             elif functionType.startswith("download"):
-                download(conn, addr)
+                download()
             elif functionType.startswith("upload"):
-                upload(conn, addr)
+                upload()
             elif functionType.startswith("exit"):
                 break
             functionType = conn.recv(SIZE).decode(FORMAT)
         # disconnect
         msg = conn.recv(SIZE).decode(FORMAT)
-        addLog(logfile, msg)
+        addLog(msg)
         conn.send("[DISCONNECTION] Server is ready to disconnect".encode(FORMAT))
         msg = conn.recv(SIZE).decode(FORMAT)
-        addLog(logfile, msg)
+        addLog(msg)
         conn.close()
-        addLog(logfile, "[DISCONNECTION] Success.")
+        addLog("[DISCONNECTION] Success.")
         logfile.close()
         
-    
+def errorRecord(errorType):
+    msg = '[ERROR] ' + errorType
+    print(msg)
+    logfile = open(UPPERPATH + '\\' + 'ServerLog.txt', 'a')
+    logfile.write(msg + '\n')
+    logfile.close()
+
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except ConnectionResetError:
+        errorRecord('Connection Reset Error')
+    except OSError:
+        errorRecord('OS Error')
